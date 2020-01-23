@@ -5,6 +5,7 @@ const speed_slider = document.getElementById('speed-slider');
 const cancelBtn_btn = document.getElementById('cancel-btn');
 const goBtn_btn = document.getElementById('go-btn');
 const resetBtn_button = document.getElementById('reset-btn');
+
 let arr = [];
 let cancelSort = false;
 let speed = 0;
@@ -14,7 +15,13 @@ initialize();
 
 function initialize() {
 	clearBoard();
-	initArray(parseInt(num_elements_select.value));
+	//initArray(parseInt(num_elements_select.value));
+	initArray(16);
+	initGraph();
+}
+
+function resize() {
+	clearBoard();
 	initGraph();
 }
 
@@ -115,6 +122,26 @@ function swapRectangles(rectNum1, rectNum2) {
 	rect2.style.height = rectTempHeight + 'px';
 }
 
+function moveRectangleTemp() {
+	moveRectangle(24, 0);
+}
+
+function moveRectangle(rectNum, position) {
+	rectTempTop = document.getElementById('rect' + rectNum).offsetTop;
+	rectTempHeight = document.getElementById('rect' + rectNum).offsetHeight;
+	for (i = rectNum; i > position; i--) {
+		rect1 = document.getElementById('rect' + i);
+		rect2 = document.getElementById('rect' + (i - 1));
+
+		rect1.style.top = rect2.offsetTop + 'px';
+		rect1.style.height = rect2.offsetHeight + 'px';
+	}
+
+	rectPos = document.getElementById('rect' + position);
+	rectPos.style.top = rectTempTop + 'px';
+	rectPos.style.height = rectTempHeight + 'px';
+}
+
 function sort() {
 	speed = speed_slider.max - speed_slider.value;
 	switch (sortSelect_select.value) {
@@ -195,4 +222,70 @@ function insertionSort(i, len, ms) {
 			insertionSort(i, len, speed);
 		}, ms);
 	else disableGo();
+}
+
+function test() {
+	console.log("Beginning Array: " + arr);
+	mergeSort(arr, 0, arr.length)
+}
+
+var mergeIndex = 0;
+
+function mergeSort(arr, l, r) {
+	if (arr.length == 1) return 1;
+	else {
+		m = Math.floor((r - l) / 2);
+	
+		var lArr = [m];
+		var rArr = [r - l - m];
+	
+		for (i = 0; i < m; i++) {
+			lArr[i] = arr[i];
+		}
+		for (i = 0; i < (r - l - m); i++) {
+			rArr[i] = arr[m + i];
+		}
+	
+		mergeSort(lArr, 0, lArr.length);
+		mergeSort(rArr, 0, rArr.length);
+
+		merge(arr, lArr, rArr);
+	}
+}
+
+var leftSide = true;
+
+function merge(arr, lArr, rArr) {
+	var rcount = 0;
+	var lcount = 0;
+	var outcount = 0;
+	llen = lArr.length;
+	rlen = rArr.length;
+	console.log("Comparing " + lArr + " & " + rArr);
+	while (outcount < (llen + rlen)) {
+		if (lArr[lcount] < rArr[rcount] || rcount >= rlen) {
+			console.log("Left side, value: " + lArr[lcount]);
+			console.log("Moving rect" + (mergeIndex + lcount) + " to rect" + (mergeIndex + outcount));
+			moveRectangle((mergeIndex + lcount), (mergeIndex + outcount));
+			arr[outcount] = lArr[lcount];
+			lcount++;
+		}
+		else if (rArr[rcount] <= lArr[lcount] || lcount >= llen) {
+			console.log("Right side, value: " + rArr[rcount]);
+			console.log("Moving rect" + (mergeIndex + rcount + llen) + " to rect" + (mergeIndex + outcount));
+			moveRectangle((mergeIndex + rcount + llen), (mergeIndex + outcount));
+			arr[outcount] = rArr[rcount];
+			rcount++;
+		}
+		outcount++;
+	}
+	if (leftSide) {
+		mergeIndex += outcount;
+	}
+	else {
+		mergeIndex -= outcount;
+	}
+	leftSide = !leftSide;
+	console.log("Output array: " + arr);
+	console.log("Merge Index: " + mergeIndex);
 }
