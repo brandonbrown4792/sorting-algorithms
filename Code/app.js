@@ -1,4 +1,5 @@
 const graphContainer_div = document.getElementById('graph-container');
+const sortSelect_select = document.getElementById('sort-select');
 const num_elements_select = document.getElementById('num-elements-select');
 const speed_slider = document.getElementById('speed-slider');
 const cancelBtn_btn = document.getElementById('cancel-btn');
@@ -6,6 +7,8 @@ const goBtn_btn = document.getElementById('go-btn');
 const resetBtn_button = document.getElementById('reset-btn');
 let arr = [];
 let cancelSort = false;
+let speed = 0;
+let len = 0;
 
 initialize();
 
@@ -28,14 +31,15 @@ function initArray(numElements) {
 	// Create arrays with numElements elements
 	let startArray = Array(numElements);
 	let randArr = Array(numElements);
+	len = startArray.length;
 
 	// Fill array with element values set from 0 to numElements
-	for (i = 0; i < startArray.length; i++) {
+	for (i = 0; i < len; i++) {
 		startArray[i] = i + 1;
 	}
 
 	// Randomize elements of startArray into new array called randArr
-	for (i = 0; i < randArr.length; i++) {
+	for (i = 0; i < len; i++) {
 		randomInt = Math.floor(Math.random() * startArray.length);
 		randArr[i] = startArray[randomInt];
 		startArray.splice(randomInt, 1);
@@ -49,7 +53,7 @@ function initGraph() {
 	var x = 0;
 	width = graphContainer_div.clientWidth / arr.length;
 
-	for (i = 0; i < arr.length; i++) {
+	for (i = 0; i < len; i++) {
 		var height = arr[i] * ($(graphContainer_div).outerHeight() - 50) / arr.length;
 		var y = $(graphContainer_div).outerHeight() - height + 1;
 		drawRectangle(x, y, width, Math.floor(height));
@@ -94,8 +98,29 @@ function drawRectangle(left, top, width, height) {
 	graphContainer_div.appendChild(rectDiv);
 }
 
+function swapRectangles(rectNum1, rectNum2) {
+	currentDate = Date.now();
+	rect1 = document.getElementById('rect' + rectNum1);
+	rect2 = document.getElementById('rect' + rectNum2);
+	var rectTempTop = rect1.offsetTop;
+	var rectTempHeight = rect1.offsetHeight;
+
+	rect1.style.top = rect2.offsetTop + 'px';
+	rect1.style.height = rect2.offsetHeight + 'px';
+	rect2.style.top = rectTempTop + 'px';
+	rect2.style.height = rectTempHeight + 'px';
+}
+
 function sort() {
-	selectionSort(0, arr.length, speed_slider.max - speed_slider.value);
+	speed = speed_slider.max - speed_slider.value;
+	switch (sortSelect_select.value) {
+		case 'selection':
+			selectionSort(0, len, speed);
+			break;
+		case 'bubble':
+			bubbleSort(0, len, speed);
+			break;
+	}
 	enableCancel();
 }
 
@@ -110,7 +135,6 @@ function selectionSort(i, len, ms) {
 			smallestIndex = j;
 		}
 	}
-	console.log('Swapping ' + i + ' & ' + smallestIndex);
 	iRect = document.getElementById('rect' + i);
 	siRect = document.getElementById('rect' + smallestIndex);
 	swapRectangles(i, smallestIndex);
@@ -120,75 +144,28 @@ function selectionSort(i, len, ms) {
 	i++;
 	if (i < len)
 		setTimeout(function() {
-			selectionSort(i, len, speed_slider.max - speed_slider.value);
+			selectionSort(i, len, speed);
 		}, ms);
 	else disableGo();
 }
 
-function swapRectangles(rectNum1, rectNum2) {
-	currentDate = Date.now();
-	rect1 = document.getElementById('rect' + rectNum1);
-	rect2 = document.getElementById('rect' + rectNum2);
-	var rectTempTop = rect1.offsetTop;
-	var rectTempHeight = rect1.offsetHeight;
-
-	rect1.style.top = rect2.offsetTop + 'px';
-	rect1.style.height = rect2.offsetHeight + 'px';
-	rect2.style.top = rectTempTop + 'px';
-	rect2.style.height = rectTempHeight + 'px';
-}
-
-/**************************Google Chart**************************
-
-// Load the Visualization API and the corechart package.
-google.charts.load('current', { packages: [ 'corechart' ] });
-
-// Set a callback to run when the Google Visualization API is loaded.
-google.charts.setOnLoadCallback(drawChart);
-
-// Callback that creates and populates a data table,
-// instantiates the pie chart, passes in the data and
-// draws it.
-function drawChart() {
-	// Create the data table.
-	var data = new google.visualization.DataTable();
-	data.addColumn('string', '');
-	data.addColumn('number', '');
-	for (i = 0; i < arr.length; i++) {
-		data.addRows([ [ '', arr[i] ] ]);
+function bubbleSort(i, len, ms) {
+	if (cancelSort) {
+		cancelSort = false;
+		return;
 	}
-
-	// Set chart options
-	var options = {
-		title  : '',
-		width  : 1000,
-		height : 400
-	};
-
-	// Instantiate and draw our chart, passing in some options.
-	var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-	chart.draw(data, options);
-}
-
-**************************Canvas**************************
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-
-drawChart();
-
-function drawChart() {
-	var width = canvas.width / 100;
-	var x = 0;
-
-	for (i = 0; i < arr.length; i++) {
-		var height = arr[i] * (canvas.height / 110);
-		// draw border
-		ctx.fillStyle = '#000000';
-		ctx.fillRect(x, canvas.height - height, width, height);
-		// draw middle
-		ctx.fillStyle = '#008080';
-		ctx.fillRect(x + 1, canvas.height - height + 1, width - 2, height - 2);
-		x = x + width;
+	for (j = 0; j < len - i - 1; j++) {
+		if (arr[j] > arr[j + 1]) {
+			swapRectangles(j, j + 1);
+			var temp = arr[j];
+			arr[j] = arr[j + 1];
+			arr[j + 1] = temp;
+		}
 	}
+	i++;
+	if (i < len)
+		setTimeout(function() {
+			bubbleSort(i, len, speed);
+		}, ms);
+	else disableGo();
 }
-*/
