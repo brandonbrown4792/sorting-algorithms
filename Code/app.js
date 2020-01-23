@@ -120,6 +120,8 @@ function sort() {
 		case 'bubble':
 			bubbleSort(0, len, speed);
 			break;
+		case 'insertion':
+			insertionSort(0, len, speed);
 	}
 	enableCancel();
 }
@@ -166,6 +168,27 @@ function bubbleSort(i, len, ms) {
 	if (i < len)
 		setTimeout(function() {
 			bubbleSort(i, len, speed);
+		}, ms);
+	else disableGo();
+}
+
+function insertionSort(i, len, ms) {
+	if (cancelSort) {
+		cancelSort = false;
+		return;
+	}
+	for (j = i; j > 0; j--) {
+		if (arr[j] < arr[j - 1]) {
+			swapRectangles(j, j - 1);
+			var temp = arr[j];
+			arr[j] = arr[j - 1];
+			arr[j - 1] = temp;
+		} else break;
+	}
+	i++;
+	if (i < len)
+		setTimeout(function() {
+			insertionSort(i, len, speed);
 		}, ms);
 	else disableGo();
 }
