@@ -63,6 +63,10 @@ function initGraph() {
 	enableGo();
 }
 
+function setSpeed() {
+	speed = speed_slider.max - speed_slider.value;
+}
+
 function enableCancel() {
 	cancelBtn_btn.disabled = false;
 }
