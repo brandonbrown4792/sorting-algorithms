@@ -5,6 +5,7 @@ const speed_slider = document.getElementById('speed-slider');
 const cancelBtn_btn = document.getElementById('cancel-btn');
 const goBtn_btn = document.getElementById('go-btn');
 const resetBtn_button = document.getElementById('reset-btn');
+
 let arr = [];
 let cancelSort = false;
 let speed = 0;
@@ -15,6 +16,11 @@ initialize();
 function initialize() {
 	clearBoard();
 	initArray(parseInt(num_elements_select.value));
+	initGraph();
+}
+
+function resize() {
+	clearBoard();
 	initGraph();
 }
 
@@ -61,6 +67,10 @@ function initGraph() {
 	}
 
 	enableGo();
+}
+
+function setSpeed() {
+	speed = speed_slider.max - speed_slider.value;
 }
 
 function enableCancel() {
@@ -111,6 +121,41 @@ function swapRectangles(rectNum1, rectNum2) {
 	rect2.style.height = rectTempHeight + 'px';
 }
 
+function moveRectangleTemp() {
+	moveRectangle(0, 31);
+}
+
+function moveRectangle(rectNum, position) {
+	rectTempTop = document.getElementById('rect' + rectNum).offsetTop;
+	rectTempHeight = document.getElementById('rect' + rectNum).offsetHeight;
+
+	if (rectNum > position) {
+		for (i = rectNum; i > position; i--) {
+			rect1 = document.getElementById('rect' + i);
+			rect2 = document.getElementById('rect' + (i - 1));
+
+			rect1.style.top = rect2.offsetTop + 'px';
+			rect1.style.height = rect2.offsetHeight + 'px';
+		}
+
+		rectPos = document.getElementById('rect' + position);
+		rectPos.style.top = rectTempTop + 'px';
+		rectPos.style.height = rectTempHeight + 'px';
+	} else if (rectNum < position) {
+		for (i = rectNum; i < position; i++) {
+			rect1 = document.getElementById('rect' + i);
+			rect2 = document.getElementById('rect' + (i + 1));
+
+			rect1.style.top = rect2.offsetTop + 'px';
+			rect1.style.height = rect2.offsetHeight + 'px';
+		}
+
+		rectPos = document.getElementById('rect' + position);
+		rectPos.style.top = rectTempTop + 'px';
+		rectPos.style.height = rectTempHeight + 'px';
+	}
+}
+
 function sort() {
 	speed = speed_slider.max - speed_slider.value;
 	switch (sortSelect_select.value) {
@@ -122,6 +167,10 @@ function sort() {
 			break;
 		case 'insertion':
 			insertionSort(0, len, speed);
+			break;
+		case 'merge':
+			mergeSort(arr, 0, len, speed);
+			break;
 	}
 	enableCancel();
 }
@@ -191,4 +240,45 @@ function insertionSort(i, len, ms) {
 			insertionSort(i, len, speed);
 		}, ms);
 	else disableGo();
+}
+
+var firstPass = true;
+
+function mergeSort(arr, index, len, ms) {
+	if (cancelSort) {
+		cancelSort = false;
+		return;
+	}
+	
+	if (arr.length == 1) return;
+
+	m = Math.floor(arr.length / 2);
+
+	var lArr = arr.slice(0, m);
+	var rArr = arr.slice(m);
+
+	var lIndex = index;
+	var rIndex = index + m;
+
+	mergeSort(lArr, lIndex, len, speed);
+	mergeSort(rArr, rIndex, len, speed);
+
+	merge(arr, lArr, rArr, lIndex, rIndex);
+}
+
+function merge(arr, lArr, rArr, lIndex, rIndex) {
+	var rcount = 0;
+	var lcount = 0;
+	llen = lArr.length;
+	rlen = rArr.length;
+	while (lcount + rcount < llen + rlen) {
+		if (lArr[lcount] < rArr[rcount] || rcount >= rlen) {
+			arr[lcount + rcount] = lArr[lcount];
+			lcount++;
+		} else if (rArr[rcount] <= lArr[lcount] || lcount >= llen) {
+			moveRectangle(rIndex + rcount, lIndex + lcount + rcount);
+			arr[lcount + rcount] = rArr[rcount];
+			rcount++;
+		}
+	}
 }
