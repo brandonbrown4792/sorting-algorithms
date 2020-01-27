@@ -10,6 +10,7 @@ let arr = [];
 let cancelSort = false;
 let speed = 0;
 let len = 0;
+let mergeVisualArr = [];
 
 initialize();
 
@@ -36,6 +37,7 @@ function reset() {
 
 function clearBoard() {
 	graphContainer_div.innerHTML = '';
+	mergeVisualArr = [];
 }
 
 function initArray(numElements) {
@@ -170,7 +172,9 @@ function sort() {
 			insertionSort(0, len, speed);
 			break;
 		case 'merge':
-			mergeSort(arr, 0, len, speed);
+			arr = mergeSort(arr, 0);
+			console.log(arr);
+			visualizeMerge(mergeVisualArr, 0, speed);
 			break;
 	}
 	enableCancel();
@@ -243,43 +247,53 @@ function insertionSort(i, len, ms) {
 	else disableGo();
 }
 
-var firstPass = true;
+function mergeSort(mergeSortArr, index) {
+	if (mergeSortArr.length == 1) return;
 
-function mergeSort(arr, index, len, ms) {
-	if (cancelSort) {
-		cancelSort = false;
-		return;
-	}
-	
-	if (arr.length == 1) return;
+	m = Math.floor(mergeSortArr.length / 2);
 
-	m = Math.floor(arr.length / 2);
-
-	var lArr = arr.slice(0, m);
-	var rArr = arr.slice(m);
+	var lArr = mergeSortArr.slice(0, m);
+	var rArr = mergeSortArr.slice(m);
 
 	var lIndex = index;
 	var rIndex = index + m;
 
-	mergeSort(lArr, lIndex, len, speed);
-	mergeSort(rArr, rIndex, len, speed);
+	mergeSort(lArr, lIndex);
+	mergeSort(rArr, rIndex);
 
-	merge(arr, lArr, rArr, lIndex, rIndex);
+	return merge(mergeSortArr, lArr, rArr, lIndex, rIndex);
 }
 
-function merge(arr, lArr, rArr, lIndex, rIndex) {
+function merge(mergeArr, lArr, rArr, lIndex, rIndex) {
 	var rcount = 0;
 	var lcount = 0;
 	llen = lArr.length;
 	rlen = rArr.length;
 	while (lcount + rcount < llen + rlen) {
 		if (lArr[lcount] < rArr[rcount] || rcount >= rlen) {
-			arr[lcount + rcount] = lArr[lcount];
+			mergeArr[lcount + rcount] = lArr[lcount];
 			lcount++;
 		} else if (rArr[rcount] <= lArr[lcount] || lcount >= llen) {
-			moveRectangle(rIndex + rcount, lIndex + lcount + rcount);
-			arr[lcount + rcount] = rArr[rcount];
+			// moveRectangle(rIndex + rcount, lIndex + lcount + rcount);
+			mergeVisualArr.push([(rIndex + rcount), (lIndex + lcount + rcount)]);
+			mergeArr[lcount + rcount] = rArr[rcount];
 			rcount++;
 		}
 	}
+
+	return mergeArr;
+}
+
+function visualizeMerge(mergeVisualArr, i, ms) {
+	if (cancelSort) {
+		cancelSort = false;
+		return;
+	}
+	moveRectangle(mergeVisualArr[i][0], mergeVisualArr[i][1]);
+	i++;
+	if (i < mergeVisualArr.length)
+		setTimeout(function() {
+			visualizeMerge(mergeVisualArr, i, speed);
+		}, ms);
+	else disableGo();
 }
