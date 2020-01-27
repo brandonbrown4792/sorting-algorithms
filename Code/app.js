@@ -24,6 +24,11 @@ function resize() {
 	initGraph();
 }
 
+function resize() {
+	clearBoard();
+	initGraph();
+}
+
 function reset() {
 	initialize();
 	resetBtn_button.style.display = 'none';
@@ -119,10 +124,6 @@ function swapRectangles(rectNum1, rectNum2) {
 	rect1.style.height = rect2.offsetHeight + 'px';
 	rect2.style.top = rectTempTop + 'px';
 	rect2.style.height = rectTempHeight + 'px';
-}
-
-function moveRectangleTemp() {
-	moveRectangle(0, 31);
 }
 
 function moveRectangle(rectNum, position) {
