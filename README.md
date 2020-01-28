@@ -10,7 +10,6 @@ What I learned:
     c. Insertion Sort
     d. Merge Sort
     e. Quick Sort
-    f. Heap Sort
 
 2. HTML
     a. Inline events

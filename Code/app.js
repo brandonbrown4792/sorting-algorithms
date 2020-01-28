@@ -11,6 +11,7 @@ let cancelSort = false;
 let speed = 0;
 let len = 0;
 let mergeVisualArr = [];
+let quickVisualArr = [];
 
 initialize();
 
@@ -38,6 +39,7 @@ function reset() {
 function clearBoard() {
 	graphContainer_div.innerHTML = '';
 	mergeVisualArr = [];
+	quickVisualArr = [];
 }
 
 function initArray(numElements) {
@@ -173,9 +175,11 @@ function sort() {
 			break;
 		case 'merge':
 			arr = mergeSort(arr, 0);
-			console.log(arr);
 			visualizeMerge(mergeVisualArr, 0, speed);
 			break;
+		case 'quicksort':
+			quickSort(0, arr.length - 1);
+			visualizeQuick(quickVisualArr, 0, speed);
 	}
 	enableCancel();
 }
@@ -275,7 +279,7 @@ function merge(mergeArr, lArr, rArr, lIndex, rIndex) {
 			lcount++;
 		} else if (rArr[rcount] <= lArr[lcount] || lcount >= llen) {
 			// moveRectangle(rIndex + rcount, lIndex + lcount + rcount);
-			mergeVisualArr.push([(rIndex + rcount), (lIndex + lcount + rcount)]);
+			mergeVisualArr.push([ rIndex + rcount, lIndex + lcount + rcount ]);
 			mergeArr[lcount + rcount] = rArr[rcount];
 			rcount++;
 		}
@@ -294,6 +298,45 @@ function visualizeMerge(mergeVisualArr, i, ms) {
 	if (i < mergeVisualArr.length)
 		setTimeout(function() {
 			visualizeMerge(mergeVisualArr, i, speed);
+		}, ms);
+	else disableGo();
+}
+
+function quickSort(lIndex, rIndex) {
+	if (lIndex >= rIndex) return;
+
+	var pivot = arr[rIndex];
+	var i = lIndex;
+	var temp = 0;
+
+	for (j = lIndex; j < rIndex; j++) {
+		if (arr[j] < pivot) {
+			quickVisualArr.push([ i, j ]);
+			temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+			i++;
+		}
+	}
+	quickVisualArr.push([ i, rIndex ]);
+	temp = arr[i];
+	arr[i] = arr[rIndex];
+	arr[rIndex] = temp;
+
+	quickSort(lIndex, i - 1);
+	quickSort(i + 1, rIndex);
+}
+
+function visualizeQuick(quickVisualArr, i, ms) {
+	if (cancelSort) {
+		cancelSort = false;
+		return;
+	}
+	swapRectangles(quickVisualArr[i][0], quickVisualArr[i][1]);
+	i++;
+	if (i < quickVisualArr.length)
+		setTimeout(function() {
+			visualizeQuick(quickVisualArr, i, speed);
 		}, ms);
 	else disableGo();
 }
