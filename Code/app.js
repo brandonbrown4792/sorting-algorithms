@@ -19,11 +19,7 @@ function initialize() {
 	clearBoard();
 	initArray(parseInt(num_elements_select.value));
 	initGraph();
-}
-
-function resize() {
-	clearBoard();
-	initGraph();
+	enableGo();
 }
 
 function resize() {
@@ -74,8 +70,6 @@ function initGraph() {
 		drawRectangle(x, y, width, Math.floor(height));
 		x += width;
 	}
-
-	enableGo();
 }
 
 function setSpeed() {
